@@ -1,4 +1,4 @@
-import { Database, LayoutDashboard, LogOut, FolderKanban } from "lucide-react";
+import { Database, LayoutDashboard, LogOut, FolderKanban, Users } from "lucide-react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 
 import { authApi } from "@/api/endpoints";
@@ -53,6 +53,7 @@ export function AppLayout() {
           {navItem("/dashboard", "Dashboard", LayoutDashboard)}
           {navItem("/projects", "Projects", FolderKanban)}
           {isAdmin && navItem("/db-explorer", "DB Explorer", Database)}
+          {isAdmin && navItem("/admin/users", "User Management", Users)}
         </nav>
         <div className="mt-auto pt-4 border-t border-slate-100">
           <div className="flex items-center gap-2 px-2 py-2">

@@ -31,6 +31,8 @@ export const usersApi = {
   changePassword: (old_password: string, new_password: string) =>
     api.post("/users/me/password", { old_password, new_password }),
   list: () => api.get<User[]>("/users").then((r) => r.data),
+  adminUpdate: (id: string, data: { role?: string; is_active?: boolean }) =>
+    api.patch<User>(`/users/${id}/admin`, data).then((r) => r.data),
 };
 
 export const projectsApi = {

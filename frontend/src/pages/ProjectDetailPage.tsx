@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { projectsApi, tasksApi } from "@/api/endpoints";
-import type { Task, TaskStatus } from "@/types";
+import type { Task, TaskStatus, TaskPriority } from "@/types";
 
 const COLUMNS: { key: TaskStatus; title: string }[] = [
   { key: "backlog", title: "Backlog" },
@@ -27,6 +27,8 @@ export function ProjectDetailPage() {
   const [view, setView] = useState<"kanban" | "list">("kanban");
   const [creating, setCreating] = useState(false);
   const [newTitle, setNewTitle] = useState("");
+  const [newPriority, setNewPriority] = useState<TaskPriority>("medium");
+  const [newAssigneeId, setNewAssigneeId] = useState<string>("");
 
   const project = useQuery({
     queryKey: ["project", projectId],
@@ -41,11 +43,18 @@ export function ProjectDetailPage() {
   });
 
   const createTask = useMutation({
-    mutationFn: () => tasksApi.create(projectId!, { title: newTitle }),
+    mutationFn: () =>
+      tasksApi.create(projectId!, {
+        title: newTitle,
+        priority: newPriority,
+        assignee_id: newAssigneeId ? newAssigneeId : undefined,
+      }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["tasks", projectId] });
       qc.invalidateQueries({ queryKey: ["project", projectId] });
       setNewTitle("");
+      setNewPriority("medium");
+      setNewAssigneeId("");
       setCreating(false);
     },
   });
@@ -105,23 +114,62 @@ export function ProjectDetailPage() {
       </div>
 
       {creating && (
-        <div className="card p-3 flex gap-2">
-          <input
-            className="input flex-1"
-            placeholder="Task title…"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-          />
-          <button
-            className="btn-primary"
-            disabled={!newTitle || createTask.isPending}
-            onClick={() => createTask.mutate()}
-          >
-            Add
-          </button>
-          <button className="btn-secondary" onClick={() => setCreating(false)}>
-            Cancel
-          </button>
+        <div className="card p-4 space-y-4 max-w-2xl border border-slate-100 shadow-sm animate-fade-in">
+          <h2 className="font-semibold text-slate-800 text-sm">Create New Task</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <label className="label">Title</label>
+              <input
+                className="input"
+                placeholder="What needs to be done?"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <label className="label">Priority</label>
+              <select
+                value={newPriority}
+                onChange={(e) => setNewPriority(e.target.value as TaskPriority)}
+                className="input cursor-pointer"
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="critical">Critical</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="label">Assignee</label>
+              <select
+                value={newAssigneeId}
+                onChange={(e) => setNewAssigneeId(e.target.value)}
+                className="input cursor-pointer"
+              >
+                <option value="">Unassigned</option>
+                {project.data?.members.map((m) => (
+                  <option key={m.user.id} value={m.user.id}>
+                    {m.user.full_name || m.user.username}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          
+          <div className="flex gap-2 pt-2">
+            <button
+              className="btn-primary"
+              disabled={!newTitle || createTask.isPending}
+              onClick={() => createTask.mutate()}
+            >
+              {createTask.isPending ? "Adding..." : "Add"}
+            </button>
+            <button className="btn-secondary" onClick={() => setCreating(false)}>
+              Cancel
+            </button>
+          </div>
         </div>
       )}
 

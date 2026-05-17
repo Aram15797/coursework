@@ -9,6 +9,7 @@ import { ProjectDetailPage } from "@/pages/ProjectDetailPage";
 import { ProjectsPage } from "@/pages/ProjectsPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { TaskDetailPage } from "@/pages/TaskDetailPage";
+import { UserManagementPage } from "@/pages/UserManagementPage";
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
         <Route path="/tasks/:taskId" element={<TaskDetailPage />} />
         <Route path="/db-explorer" element={<DbExplorerPage />} />
+        <Route path="/admin/users" element={<UserManagementPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
